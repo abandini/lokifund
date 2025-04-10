@@ -16,6 +16,8 @@ import Documents from './pages/Documents';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import TradingAlgorithms from './pages/TradingAlgorithms';
+import AdvancedAIStrategies from './pages/AdvancedAIStrategies';
+import APIReference from './pages/APIReference';
 
 // Create a theme
 const theme = createTheme({
@@ -60,6 +62,8 @@ function App() {
               <Route path="/documents" element={<Documents />} />
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/trading-algorithms" element={<TradingAlgorithms />} />
+              <Route path="/advanced-ai" element={<AdvancedAIStrategies />} />
+              <Route path="/api-reference" element={<APIReference />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>

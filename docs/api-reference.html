@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fund Management Tool API Reference</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #1976d2;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #1976d2;
+        }
+        .endpoint {
+            background-color: #f5f5f5;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 5px 5px 0;
+        }
+        .method {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-weight: bold;
+            color: white;
+            margin-right: 10px;
+        }
+        .get {
+            background-color: #4CAF50;
+        }
+        .post {
+            background-color: #2196F3;
+        }
+        .put {
+            background-color: #FF9800;
+        }
+        .delete {
+            background-color: #F44336;
+        }
+        pre {
+            background-color: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .nav {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .nav li {
+            margin-bottom: 10px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: #1976d2;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .response-example, .request-example {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Fund Management Tool API Reference</h1>
+        <p>Comprehensive API documentation for programmatic access to the Fund Management Tool platform</p>
+    </header>
+
+    <div class="nav">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#authentication">Authentication</a></li>
+            <li><a href="#fund-management">Fund Management</a></li>
+            <li><a href="#investor-management">Investor Management</a></li>
+            <li><a href="#portfolio-management">Portfolio Management</a></li>
+            <li><a href="#ai-trading-strategies">AI Trading Strategies</a></li>
+            <li><a href="#analytics">Analytics</a></li>
+            <li><a href="#documents">Documents</a></li>
+            <li><a href="#compliance">Compliance</a></li>
+            <li><a href="#webhooks">Webhooks</a></li>
+            <li><a href="#error-handling">Error Handling</a></li>
+            <li><a href="#sdks">SDKs and Client Libraries</a></li>
+            <li><a href="#changelog">Changelog</a></li>
+        </ul>
+    </div>
+
+    <div class="section" id="overview">
+        <h2>Overview</h2>
+        <p>The Fund Management Tool API provides programmatic access to all features of the platform, including portfolio management, investor relations, compliance tracking, document management, analytics, and advanced AI trading strategies.</p>
+        
+        <h3>Base URL</h3>
+        <pre><code>https://api.fundmanagementtool.com/v1</code></pre>
+    </div>
+
+    <div class="section" id="authentication">
+        <h2>Authentication</h2>
+        <p>Authentication is performed using API keys. Each request must include an <code>Authorization</code> header with a valid API key:</p>
+        <pre><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+        
+        <p>To obtain an API key, navigate to the Settings page in the Fund Management Tool and select the "API Access" tab.</p>
+        
+        <h3>Rate Limiting</h3>
+        <p>API requests are rate-limited to 100 requests per minute per API key. If you exceed this limit, you will receive a <code>429 Too Many Requests</code> response.</p>
+        
+        <h3>Common Response Codes</h3>
+        <table>
+            <tr>
+                <th>Code</th>
+                <th>Description</th>
+            </tr>
+            <tr>
+                <td>200</td>
+                <td>Success</td>
+            </tr>
+            <tr>
+                <td>400</td>
+                <td>Bad Request - Invalid parameters</td>
+            </tr>
+            <tr>
+                <td>401</td>
+                <td>Unauthorized - Invalid or missing API key</td>
+            </tr>
+            <tr>
+                <td>403</td>
+                <td>Forbidden - Insufficient permissions</td>
+            </tr>
+            <tr>
+                <td>404</td>
+                <td>Not Found - Resource does not exist</td>
+            </tr>
+            <tr>
+                <td>429</td>
+                <td>Too Many Requests - Rate limit exceeded</td>
+            </tr>
+            <tr>
+                <td>500</td>
+                <td>Internal Server Error</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section" id="fund-management">
+        <h2>Fund Management</h2>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <code>/funds</code>
+            <p>Retrieves a list of all funds managed by the authenticated user.</p>
+            
+            <h4>Parameters:</h4>
+            <ul>
+                <li><code>status</code> (optional): Filter by fund status (active, pending, closed)</li>
+                <li><code>limit</code> (optional): Maximum number of funds to return (default: 20, max: 100)</li>
+                <li><code>offset</code> (optional): Pagination offset (default: 0)</li>
+            </ul>
+            
+            <div class="response-example">
+                <h4>Response Example:</h4>
+                <pre><code>{
+  "funds": [
+    {
+      "id": "fund_123abc",
+      "name": "Global Opportunities Fund",
+      "status": "active",
+      "aum": 25000000,
+      "currency": "USD",
+      "inception_date": "2023-01-15",
+      "strategy": "Long/Short Equity",
+      "manager_id": "user_456def"
+    }
+  ],
+  "total": 5,
+  "limit": 20,
+  "offset": 0
+}</code></pre>
+            </div>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/funds</code>
+            <p>Creates a new fund.</p>
+            
+            <div class="request-example">
+                <h4>Request Example:</h4>
+                <pre><code>{
+  "name": "Emerging Markets Fund",
+  "currency": "USD",
+  "strategy": "Long-Only Equity",
+  "description": "A fund focused on emerging market opportunities."
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="ai-trading-strategies">
+        <h2>AI Trading Strategies</h2>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span>
+            <code>/ai/strategies</code>
+            <p>Retrieves a list of all available AI trading strategies.</p>
+            
+            <h4>Parameters:</h4>
+            <ul>
+                <li><code>status</code> (optional): Filter by strategy status (active, development, archived)</li>
+                <li><code>type</code> (optional): Filter by strategy type (drl, transformer, sentiment, multiagent, quantum, explainable, adaptive, hierarchical)</li>
+            </ul>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/ai/strategies/{strategy_id}/train</code>
+            <p>Initiates training for a specific AI trading strategy.</p>
+            
+            <div class="request-example">
+                <h4>Request Example:</h4>
+                <pre><code>{
+  "configuration": {
+    "model_type": "a2c",
+    "risk_aversion": 0.5,
+    "training_episodes": 10000,
+    "features": ["price", "volume", "volatility", "momentum", "sentiment"],
+    "lookback_window": 30
+  },
+  "asset_universe": ["AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA", "NVDA", "JPM", "V", "PG"],
+  "training_start_date": "2020-01-01",
+  "training_end_date": "2024-12-31"
+}</code></pre>
+            </div>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span>
+            <code>/ai/sentiment/analyze</code>
+            <p>Analyzes sentiment for specified assets or text content.</p>
+            
+            <div class="request-example">
+                <h4>Request Example:</h4>
+                <pre><code>{
+  "assets": ["AAPL", "MSFT", "GOOGL"],
+  "sources": ["news", "social_media", "earnings_calls"],
+  "time_range": {
+    "start_date": "2025-04-01",
+    "end_date": "2025-05-01"
+  },
+  "model": "llm-finance-large"
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="webhooks">
+        <h2>Webhooks</h2>
+        <p>The Fund Management Tool API supports webhooks for real-time notifications of events. To set up a webhook, navigate to the Settings page in the Fund Management Tool and select the "Webhooks" tab.</p>
+        
+        <h3>Event Types</h3>
+        <ul>
+            <li><code>fund.created</code> - A new fund has been created</li>
+            <li><code>fund.updated</code> - Fund details have been updated</li>
+            <li><code>investor.created</code> - A new investor has been added</li>
+            <li><code>investor.updated</code> - Investor details have been updated</li>
+            <li><code>trade.executed</code> - A trade has been executed</li>
+            <li><code>document.uploaded</code> - A new document has been uploaded</li>
+            <li><code>compliance.task_due</code> - A compliance task is due soon</li>
+            <li><code>ai.training_completed</code> - AI model training has completed</li>
+            <li><code>ai.prediction_generated</code> - New AI predictions are available</li>
+        </ul>
+    </div>
+
+    <div class="section" id="error-handling">
+        <h2>Error Handling</h2>
+        <p>All error responses follow a standard format:</p>
+        <pre><code>{
+  "error": {
+    "code": "invalid_parameter",
+    "message": "The parameter 'limit' must be a positive integer.",
+    "details": {
+      "parameter": "limit",
+      "value": "-10"
+    }
+  }
+}</code></pre>
+    </div>
+
+    <div class="section" id="sdks">
+        <h2>SDKs and Client Libraries</h2>
+        <p>The Fund Management Tool provides official client libraries for the following languages:</p>
+        <ul>
+            <li>JavaScript/TypeScript: <a href="https://www.npmjs.com/package/fundmanagementtool-api">npm package</a></li>
+            <li>Python: <a href="https://pypi.org/project/fundmanagementtool-api/">PyPI package</a></li>
+            <li>Java: <a href="https://mvnrepository.com/artifact/com.fundmanagementtool/api-client">Maven package</a></li>
+            <li>C#: <a href="https://www.nuget.org/packages/FundManagementTool.ApiClient">NuGet package</a></li>
+        </ul>
+    </div>
+
+    <div class="section" id="changelog">
+        <h2>Changelog</h2>
+        <h3>v1.5.0 (2025-05-01)</h3>
+        <ul>
+            <li>Added Advanced AI Trading Strategies endpoints</li>
+            <li>Added sentiment analysis capabilities</li>
+            <li>Improved portfolio optimization algorithms</li>
+        </ul>
+        
+        <h3>v1.4.0 (2025-03-15)</h3>
+        <ul>
+            <li>Added performance attribution analysis</li>
+            <li>Enhanced document management features</li>
+            <li>Improved compliance tracking</li>
+        </ul>
+        
+        <h3>v1.0.0 (2024-11-01)</h3>
+        <ul>
+            <li>Initial release of the Fund Management Tool API</li>
+        </ul>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Fund Management Tool. All rights reserved.</p>
+    </footer>
+</body>
+</html>

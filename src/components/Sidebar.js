@@ -18,7 +18,9 @@ import {
   Description as DocumentsIcon,
   BarChart as AnalyticsIcon,
   TrendingUp as TradingAlgorithmsIcon,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Science as ScienceIcon,
+  Api as ApiIcon
 } from '@mui/icons-material';
 
 const Sidebar = () => {
@@ -59,6 +61,16 @@ const Sidebar = () => {
       text: 'Trading Algorithms',
       icon: <TradingAlgorithmsIcon />,
       path: '/trading-algorithms'
+    },
+    {
+      text: 'Advanced AI Strategies',
+      icon: <ScienceIcon />,
+      path: '/advanced-ai'
+    },
+    {
+      text: 'API Reference',
+      icon: <ApiIcon />,
+      path: '/api-reference'
     },
     {
       text: 'Settings',
