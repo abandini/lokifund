@@ -32,6 +32,7 @@ import {
 import DRLPortfolioOptimizer from '../components/advanced/DRLPortfolioOptimizer';
 import TransformerMarketPredictor from '../components/advanced/TransformerMarketPredictor';
 import SentimentAnalysisLLM from '../components/advanced/SentimentAnalysisLLM';
+import SolomonoffReinforcementLearning from '../components/advanced/SolomonoffReinforcementLearning';
 
 const AdvancedAIStrategies = () => {
   const [activeStrategy, setActiveStrategy] = useState(null);
@@ -54,6 +55,15 @@ const AdvancedAIStrategies = () => {
 
   // Strategy cards data
   const strategyCards = [
+    {
+      id: 'solomonoff',
+      title: 'Solomonoff Induction',
+      subtitle: 'Reinforcement Learning',
+      description: 'Combines reinforcement learning with Solomonoff\'s theory of inductive inference to find the simplest model that explains market patterns.',
+      icon: <ScienceIcon />,
+      tags: ['Algorithmic Information Theory', 'Bayesian', 'Minimum Description Length'],
+      component: <SolomonoffReinforcementLearning />
+    },
     {
       id: 'drl',
       title: 'Deep Reinforcement Learning',
@@ -185,6 +195,7 @@ const AdvancedAIStrategies = () => {
           <Tab label="Market Prediction" />
           <Tab label="Sentiment Analysis" />
           <Tab label="Risk Management" />
+          <Tab label="Theoretical Models" />
         </Tabs>
       </Paper>
       
@@ -196,6 +207,7 @@ const AdvancedAIStrategies = () => {
             if (tabValue === 2) return strategy.id === 'transformer' || strategy.id === 'adaptive';
             if (tabValue === 3) return strategy.id === 'sentiment' || strategy.id === 'explainable';
             if (tabValue === 4) return strategy.id === 'multiagent' || strategy.id === 'quantum';
+            if (tabValue === 5) return strategy.id === 'solomonoff';
             return true;
           })
           .map((strategy) => (

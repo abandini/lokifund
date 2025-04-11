@@ -3,48 +3,97 @@ import {
   Box,
   Typography,
   Paper,
-  Grid,
-  TextField,
+  Stepper,
+  Step,
+  StepLabel,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Grid,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Chip,
-  Stepper,
-  Step,
-  StepLabel,
-  Card,
-  CardContent,
-  CardHeader,
+  TextField,
   Divider,
+  Slider,
+  Switch,
+  FormControlLabel,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Slider,
-  Switch,
-  FormControlLabel,
-  Alert
+  Alert,
+  Chip,
+  Tooltip,
+  Link
 } from '@mui/material';
 import {
-  TrendingUp,
   Psychology,
-  Code,
   Settings as SettingsIcon,
   Tune,
   PlayArrow,
   Save,
   CheckCircle,
-  Warning
+  Warning,
+  Launch as LaunchIcon,
+  TrendingUp,
+  Code
 } from '@mui/icons-material';
 
-// Mock AI model options
-const aiModels = [
-  { id: 'lstm', name: 'LSTM Neural Network', description: 'Long Short-Term Memory networks for time series prediction' },
-  { id: 'transformer', name: 'Transformer Model', description: 'Attention-based model for market pattern recognition' },
-  { id: 'ensemble', name: 'Ensemble Learning', description: 'Combines multiple models for improved prediction accuracy' },
-  { id: 'reinforcement', name: 'Reinforcement Learning', description: 'Learns optimal trading strategies through reward-based training' }
+// AI provider options
+const aiProviders = [
+  { 
+    id: 'openai', 
+    name: 'OpenAI', 
+    description: 'GPT-4 and other advanced models for market analysis and prediction',
+    models: [
+      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: 'Most powerful model for complex financial analysis' },
+      { id: 'gpt-4', name: 'GPT-4', description: 'Advanced reasoning for market pattern recognition' },
+      { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and cost-effective for routine analysis' }
+    ],
+    documentationUrl: 'https://platform.openai.com/docs/api-reference'
+  },
+  { 
+    id: 'anthropic', 
+    name: 'Anthropic', 
+    description: 'Claude models for nuanced market sentiment analysis and forecasting',
+    models: [
+      { id: 'claude-3-opus', name: 'Claude 3 Opus', description: 'Highest capability model for sophisticated financial analysis' },
+      { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', description: 'Balanced performance for most trading applications' },
+      { id: 'claude-3-haiku', name: 'Claude 3 Haiku', description: 'Fast responses for real-time market monitoring' }
+    ],
+    documentationUrl: 'https://docs.anthropic.com/claude/reference/getting-started-with-the-api'
+  },
+  { 
+    id: 'google', 
+    name: 'Google AI', 
+    description: 'Gemini models for comprehensive market analysis and prediction',
+    models: [
+      { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', description: 'Advanced model for multimodal financial analysis' },
+      { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', description: 'Fast inference for real-time trading signals' },
+      { id: 'gemini-1.0-pro', name: 'Gemini 1.0 Pro', description: 'Reliable model for standard financial applications' }
+    ],
+    documentationUrl: 'https://ai.google.dev/docs'
+  },
+  { 
+    id: 'custom', 
+    name: 'Custom Models', 
+    description: 'Traditional ML models trained on your specific data',
+    models: [
+      { id: 'lstm', name: 'LSTM Neural Network', description: 'Long Short-Term Memory networks for time series prediction' },
+      { id: 'transformer', name: 'Transformer Model', description: 'Attention-based model for market pattern recognition' },
+      { id: 'ensemble', name: 'Ensemble Learning', description: 'Combines multiple models for improved prediction accuracy' },
+      { id: 'reinforcement', name: 'Reinforcement Learning', description: 'Learns optimal trading strategies through reward-based training' }
+    ],
+    documentationUrl: null
+  }
 ];
 
 // Mock market indicators
@@ -67,25 +116,45 @@ const dataSources = [
 
 const AIAlgorithmBuilder = () => {
   const [activeStep, setActiveStep] = useState(0);
+  const [selectedProvider, setSelectedProvider] = useState('');
   const [selectedModel, setSelectedModel] = useState('');
+  const [apiKeys, setApiKeys] = useState({
+    openai: localStorage.getItem('openai_api_key') || '',
+    anthropic: localStorage.getItem('anthropic_api_key') || '',
+    google: localStorage.getItem('google_api_key') || ''
+  });
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
+  const [currentKeyProvider, setCurrentKeyProvider] = useState('');
   const [selectedIndicators, setSelectedIndicators] = useState([]);
   const [selectedDataSources, setSelectedDataSources] = useState([]);
   const [hyperparameters, setHyperparameters] = useState({
     learningRate: 0.001,
     epochs: 100,
     batchSize: 32,
-    dropout: 0.2
+    dropout: 0.2,
+    temperature: 0.7,
+    maxTokens: 1000
   });
-  const [riskTolerance, setRiskTolerance] = useState(50);
-  const [useAutoOptimize, setUseAutoOptimize] = useState(true);
+  const [algorithmName, setAlgorithmName] = useState('');
+  const [algorithmDescription, setAlgorithmDescription] = useState('');
+  const [trainingStatus, setTrainingStatus] = useState(null); // null, 'training', 'success', 'error'
+  const [validationResults, setValidationResults] = useState(null);
   const [generationStatus, setGenerationStatus] = useState(null);
+  const [useAutoOptimize, setUseAutoOptimize] = useState(true);
+  const [riskTolerance, setRiskTolerance] = useState(50);
 
   const steps = ['Select AI Model', 'Configure Indicators', 'Data Sources', 'Hyperparameters', 'Risk Management', 'Generate & Test'];
 
   const handleNext = () => {
+    if (activeStep === 0 && 
+        selectedProvider && 
+        selectedProvider !== 'custom' && 
+        !hasApiKey(selectedProvider)) {
+      handleOpenApiKeyDialog(selectedProvider);
+      return;
+    }
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
     if (activeStep === 5) {
-      // Final step - generate algorithm
       handleGenerateAlgorithm();
     }
   };
@@ -134,11 +203,41 @@ const AIAlgorithmBuilder = () => {
   };
 
   const handleGenerateAlgorithm = () => {
-    // Simulate algorithm generation
     setGenerationStatus('generating');
     setTimeout(() => {
       setGenerationStatus('complete');
     }, 3000);
+  };
+
+  const handleOpenApiKeyDialog = (providerId) => {
+    setCurrentKeyProvider(providerId);
+    setShowApiKeyDialog(true);
+  };
+
+  const handleCloseApiKeyDialog = () => {
+    setShowApiKeyDialog(false);
+  };
+
+  const handleSaveApiKey = () => {
+    localStorage.setItem(`${currentKeyProvider}_api_key`, apiKeys[currentKeyProvider]);
+    handleCloseApiKeyDialog();
+  };
+
+  const handleApiKeyChange = (event) => {
+    setApiKeys({
+      ...apiKeys,
+      [currentKeyProvider]: event.target.value
+    });
+  };
+
+  const hasApiKey = (providerId) => {
+    return apiKeys[providerId] && apiKeys[providerId].trim() !== '';
+  };
+
+  const handleProviderChange = (event) => {
+    const provider = event.target.value;
+    setSelectedProvider(provider);
+    setSelectedModel(''); // Reset model when provider changes
   };
 
   const getStepContent = (step) => {
@@ -147,78 +246,96 @@ const AIAlgorithmBuilder = () => {
         return (
           <Box>
             <Typography variant="h6" gutterBottom>
-              Select AI Model
+              Select an AI Provider and Model
             </Typography>
-            <Typography variant="body2" color="text.secondary" paragraph>
-              Choose the AI model that best fits your trading strategy requirements.
-            </Typography>
-            <FormControl fullWidth sx={{ mb: 3 }}>
-              <InputLabel>AI Model</InputLabel>
+            
+            {/* Provider selection */}
+            <FormControl fullWidth sx={{ mb: 4 }}>
+              <InputLabel>AI Provider</InputLabel>
               <Select
-                value={selectedModel}
-                label="AI Model"
-                onChange={handleModelChange}
+                value={selectedProvider}
+                onChange={handleProviderChange}
+                label="AI Provider"
               >
-                {aiModels.map((model) => (
-                  <MenuItem key={model.id} value={model.id}>
-                    {model.name}
+                {aiProviders.map((provider) => (
+                  <MenuItem key={provider.id} value={provider.id}>
+                    {provider.name}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
-            {selectedModel && (
-              <Card elevation={0} sx={{ borderRadius: 2, border: '1px solid rgba(0, 0, 0, 0.12)' }}>
-                <CardHeader 
-                  title={aiModels.find(m => m.id === selectedModel)?.name}
-                  avatar={<Psychology color="primary" />}
-                />
-                <Divider />
-                <CardContent>
-                  <Typography variant="body2">
-                    {aiModels.find(m => m.id === selectedModel)?.description}
-                  </Typography>
-                  {selectedModel === 'lstm' && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2">
-                        <strong>Best for:</strong> Time series prediction, pattern recognition in market data
+
+            {selectedProvider && (
+              <>
+                {/* Provider details */}
+                <Box sx={{ mb: 3 }}>
+                  <Paper sx={{ p: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="h6">
+                        {aiProviders.find(p => p.id === selectedProvider)?.name}
                       </Typography>
-                      <Typography variant="body2">
-                        <strong>Strengths:</strong> Captures long-term dependencies, handles sequential data well
-                      </Typography>
+                      
+                      {selectedProvider !== 'custom' && (
+                        <Box>
+                          <Chip 
+                            label={hasApiKey(selectedProvider) ? "API Key Set" : "API Key Required"}
+                            color={hasApiKey(selectedProvider) ? "success" : "warning"}
+                            sx={{ mr: 1 }}
+                          />
+                          <Button 
+                            size="small" 
+                            variant="outlined" 
+                            onClick={() => handleOpenApiKeyDialog(selectedProvider)}
+                          >
+                            {hasApiKey(selectedProvider) ? "Update API Key" : "Set API Key"}
+                          </Button>
+                        </Box>
+                      )}
                     </Box>
-                  )}
-                  {selectedModel === 'transformer' && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2">
-                        <strong>Best for:</strong> Complex pattern recognition, multi-factor analysis
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Strengths:</strong> Attention mechanism focuses on relevant data points, handles long sequences
-                      </Typography>
-                    </Box>
-                  )}
-                  {selectedModel === 'ensemble' && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2">
-                        <strong>Best for:</strong> Robust predictions, reducing overfitting
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Strengths:</strong> Combines multiple models, reduces variance, improves stability
-                      </Typography>
-                    </Box>
-                  )}
-                  {selectedModel === 'reinforcement' && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2">
-                        <strong>Best for:</strong> Dynamic trading environments, optimizing for specific reward functions
-                      </Typography>
-                      <Typography variant="body2">
-                        <strong>Strengths:</strong> Learns through trial and error, adapts to changing market conditions
-                      </Typography>
-                    </Box>
-                  )}
-                </CardContent>
-              </Card>
+                    
+                    <Typography variant="body2" color="text.secondary" paragraph>
+                      {aiProviders.find(p => p.id === selectedProvider)?.description}
+                    </Typography>
+                    
+                    {aiProviders.find(p => p.id === selectedProvider)?.documentationUrl && (
+                      <Button 
+                        size="small" 
+                        href={aiProviders.find(p => p.id === selectedProvider)?.documentationUrl}
+                        target="_blank"
+                        endIcon={<LaunchIcon />}
+                      >
+                        View Documentation
+                      </Button>
+                    )}
+                  </Paper>
+                </Box>
+
+                {/* Model selection */}
+                <Typography variant="subtitle1" gutterBottom>
+                  Select a Model
+                </Typography>
+                <Grid container spacing={3}>
+                  {aiProviders.find(p => p.id === selectedProvider)?.models.map((model) => (
+                    <Grid item xs={12} md={6} key={model.id}>
+                      <Card 
+                        sx={{ 
+                          cursor: 'pointer',
+                          border: selectedModel === model.id ? '2px solid #1976d2' : 'none',
+                          height: '100%'
+                        }}
+                        onClick={() => setSelectedModel(model.id)}
+                      >
+                        <CardContent>
+                          <Typography variant="h6">{model.name}</Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {model.description}
+                          </Typography>
+                        </CardContent>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              </>
             )}
           </Box>
         );
@@ -387,6 +504,34 @@ const AIAlgorithmBuilder = () => {
                   max={0.5}
                   step={0.05}
                   onChange={(e, val) => handleHyperparameterChange('dropout', val)}
+                  valueLabelDisplay="auto"
+                  disabled={useAutoOptimize}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography gutterBottom>
+                  Temperature: {hyperparameters.temperature}
+                </Typography>
+                <Slider
+                  value={hyperparameters.temperature}
+                  min={0}
+                  max={2}
+                  step={0.1}
+                  onChange={(e, val) => handleHyperparameterChange('temperature', val)}
+                  valueLabelDisplay="auto"
+                  disabled={useAutoOptimize}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Typography gutterBottom>
+                  Max Tokens: {hyperparameters.maxTokens}
+                </Typography>
+                <Slider
+                  value={hyperparameters.maxTokens}
+                  min={100}
+                  max={8000}
+                  step={100}
+                  onChange={(e, val) => handleHyperparameterChange('maxTokens', val)}
                   valueLabelDisplay="auto"
                   disabled={useAutoOptimize}
                 />
